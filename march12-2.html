@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Viewer</title>
+
+  <!-- ========================= GLOBAL RESET (to remove margins) ========================= -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  </style>
+
+  <!-- =========================================
+       DESKTOP STYLES (same as your base file)
+       ========================================= -->
+  <style>
+    /* 
+      A .wrapper that’s 100% wide, 
+      inside it a .centered-box with width 960px + margin:0 auto 
+      => Everything is centered as a group. 
+    */
+    #desktopVersion .wrapper {
+      width: 100%;
+    }
+    #desktopVersion .centered-box {
+      width: 960px;
+      margin: 0 auto;
+    }
+    #desktopVersion .scale-container {
+      margin: 0 auto;
+    }
+    #desktopVersion {
+      font-family: Arial, sans-serif;
+    }
+    #desktopVersion .player-frame {
+      width: 960px;
+      height: 540px;
+      background-size: 960px 540px;
+      position: relative;
+    }
+    #desktopVersion .video-container {
+      width: 960px;
+      height: 540px;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: center center;
+    }
+    #desktopVersion video {
+      position: absolute;
+      top: 0;
+      left: -960px;
+      width: 1920px;
+      height: 540px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    #desktopVersion .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+    }
+    /* Desktop controls */
+    #desktopVersion .controls-container {
+      width: 940px;
+      background-color: #fdf8eb;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #desktopVersion .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+    }
+    #desktopVersion .toggle-label {
+      margin: 0 10px;
+      font-size: 14px;
+      color: #000;
+    }
+    #desktopVersion .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+    #desktopVersion .toggle-switch input {
+      opacity: 0; width: 0; height: 0;
+    }
+    #desktopVersion .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 15px;
+    }
+    #desktopVersion .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px; width: 22px;
+      left: 4px; bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    #desktopVersion input:checked + .slider {
+      background-color: #2196F3;
+    }
+    #desktopVersion input:checked + .slider:before {
+      transform: translateX(30px);
+    }
+    #desktopVersion .control-button {
+      width: 50px;
+      height: 50px;
+      background-size: 100px 50px;
+      cursor: pointer;
+    }
+    #desktopVersion #playpause-toggle {
+      background: url('https://static.originmedia.tv/website/aperture-sidebyside/interface/playpause.png') no-repeat;
+      background-position: 0px 0;
+      margin-right: 10px;
+    }
+    #desktopVersion #sound-toggle {
+      background: url('https://static.originmedia.tv/website/aperture-sidebyside/interface/sound.png') no-repeat;
+      background-position: 0px 0;
+    }
+    /* Desktop carousel */
+    #desktopVersion .video-buttons-container {
+      width: 960px;
+      display: flex;
+      align-items: center;
+      padding: 5px 0 0 0;
+    }
+    #desktopVersion .scroll {
+      color: #fff;
+      width: 18px; height: 170px;
+      background-color: #b491bf;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 100px;
+      text-align: center;
+      user-select: none;
+      padding: 0;
+      transition: background-color 0.3s;
+    }
+    #desktopVersion .scroll:hover {
+      background-color: #a27aaf;
+    }
+    #desktopVersion .scroll-left {
+      margin-right: 6px;
+    }
+    #desktopVersion .scroll-right {
+      margin-left: 6px;
+    }
+    #desktopVersion .video-buttons-wrapper {
+      width: 912px;
+      overflow: hidden;
+    }
+    #desktopVersion .video-buttons-inner {
+      display: flex;
+      gap: 6px;
+      transition: transform 0.6s ease-in-out;
+    }
+    #desktopVersion .video-buttons-inner.scrolling {
+      pointer-events: none;
+    }
+    #desktopVersion .video-button {
+      flex: 0 0 calc((100% - 24px) / 5);
+      height: 170px;
+      padding: 16px 10px 0 10px;
+      background-color: #faf6f0;
+      color: #333;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+      box-sizing: border-box;
+    }
+    #desktopVersion .video-button:hover {
+      background-color: #d4cadf;
+    }
+    #desktopVersion .video-button.active {
+      background-color: #8a73a3;
+      color: #fff;
+    }
+    #desktopVersion .video-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    #desktopVersion .video-brand {
+      font-size: 12px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    #desktopVersion .video-brand::before {
+      content: "Brand: ";
+    }
+    /* Force the tag text to wrap instead of extending on one line */
+    #desktopVersion .video-tags {
+      background-color: #a294b3;
+      width: 100%;
+      height: 100px;
+      box-sizing: border-box;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      margin-top: 1px;
+      padding: 8px;
+      text-align: center;
+      overflow-wrap: break-word; 
+    }
+    #desktopVersion .video-button:hover .video-tags,
+    #desktopVersion .video-button.active .video-tags {
+      opacity: 1;
+    }
+    #desktopVersion .tag-header {
+      font-size: 12px;
+      display: block;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    /* Each tag is inline-block, so they'll wrap if needed */
+    #desktopVersion .video-tag {
+      font-size: 11px;
+      background: #f3eff7;
+      color: #666;
+      padding: 2px 16px;
+      border-radius: 9px;
+      display: inline-block;
+      margin: 5px 4px 2px 4px;
+      white-space: normal;
+    }
+    #desktopVersion .emoji {
+      display: none;
+    }
+    #desktopVersion #instructions {
+      font-size: 13px;
+      color: #666;
+      margin: 10px 0;
+      text-align: center;
+    }
+      
+    @media (min-width: 940px) and (max-width: 959px) {
+      #desktopVersion .scale-container {
+        width: 960px;
+        transform: scale(0.979);
+        transform-origin: top left;
+      }
+      #desktopVersion .centered-box {
+        width: 940px;
+        margin: 0 auto;
+      }
+    }
+    @media (max-width: 939px) {
+      #desktopVersion .scale-container {
+        width: 960px;
+        transform: scale(0.77);
+        transform-origin: top left;
+      }
+      #desktopVersion .centered-box {
+        width: 740px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+
+  <!-- ======================================
+       MOBILE STYLES
+       ====================================== -->
+  <style>
+    #mobileVersion {
+      display: none;
+      font-family: Arial, sans-serif;
+      margin: 0; 
+      padding: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #mobileVersion .mobile-player-frame {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      height: 0;
+      padding-bottom: 56.25%;
+      background-color: #000;
+    }
+    #mobileVersion .mobile-poster-wrapper {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow: hidden;
+    }
+    #mobileVersion .mobile-poster-img {
+      position: absolute;
+      top: 0; 
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #mobileVersion .mobile-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #mobileVersion #instructions {
+      font-size: 9px;
+      color: #666;
+      margin: 10px 0;
+      text-align: center;
+      background: none;
+    }
+    #mobileVideo {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+      z-index: 2;
+    }
+    #mobileVersion .mobile-controls-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between; 
+      padding: 10px;
+      background-color: #ffffff;
+    }
+    #mobileVersion .mobile-left-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mobile-toggle-label {
+      font-size: 14px;
+      color: #000;
+    }
+    .mobile-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+    .mobile-toggle-switch input {
+      opacity: 0; width: 0; height: 0;
+    }
+    .mobile-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 15px;
+      scale: 0.85;
+    }
+    .mobile-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px; width: 22px;
+      left: 4px; bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    .mobile-toggle-switch input:checked + .mobile-slider {
+      background-color: #2196F3;
+    }
+    .mobile-toggle-switch input:checked + .mobile-slider:before {
+      transform: translateX(30px);
+    }
+    #mobileVersion .mobile-play-btn {
+      width: 35px; 
+      height: 35px;
+      background: url('https://static.originmedia.tv/website/aperture-sidebyside/interface/playpause.png') no-repeat;
+      background-position: 0 0;
+      background-size: 70px 35px; 
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    #mobileVersion .mobile-description {
+      width: 100%;
+      background-color: #a294b3;
+      text-align: center;
+      color: #fff;
+      box-sizing: border-box;
+      padding: 20px 10px;
+      position: relative;
+    }
+    .mdNavArrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 36px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #mobileLeftArrow {
+      left: 20px;
+    }
+    #mobileRightArrow {
+      right: 20px;
+    }
+    .mdNavArrow:active {
+      opacity: 0.7;
+    }
+    .mdTitle {
+      text-align: center;
+      padding: 0 50px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 0px;
+    }
+    .mdBrand {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .mdTagHeader {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 4px;
+      color: #fff;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: rgba(0,0,0,0.15);
+      width: 55%;
+    }
+    .mdTags {
+      display: block;
+      margin: 10px auto 0 auto;
+      width: 90%;
+    }
+    .mobile-tag {
+      font-size: 9px;
+      background: #f3eff7;
+      color: #666;
+      padding: 4px 16px;
+      border-radius: 9px;
+      text-align: center;
+      display: block;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========================= DESKTOP LAYOUT ========================= -->
+<div id="desktopVersion">
+  <div class="wrapper">
+    <div class="centered-box">
+      <div class="scale-container">
+        <div class="player-frame">
+          <div class="video-container">
+            <video id="video" poster="https://static.originmedia.tv/website/aperture-sidebyside/jpg/puertorico-onoff.jpg">
+              <source id="video-source" 
+                      src="https://static.originmedia.tv/website/aperture-sidebyside/mov/puertorico-onoff.mov" 
+                      type="video/mp4"/>
+              Your browser does not support the video tag.
+            </video>
+            <div class="overlay" id="overlay"></div>
+          </div>
+        </div>
+        <!-- Desktop Controls -->
+        <div class="controls-container">
+          <div id="playpause-toggle" class="control-button"></div>
+          <div class="toggle-container">
+            <span class="toggle-label left-label">Without Aperture</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle" />
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label right-label">With Aperture</span>
+          </div>
+          <div id="sound-toggle" class="control-button"></div>
+        </div>
+        <!-- Desktop Carousel -->
+        <div class="video-buttons-container">
+          <button id="scroll-left" class="scroll scroll-left">&#9664;</button>
+          <div class="video-buttons-wrapper">
+            <div class="video-buttons-inner"></div>
+          </div>
+          <button id="scroll-right" class="scroll scroll-right">&#9654;</button>
+        </div>
+        <div id="instructions">Select an example above to see how Aperture elevates ads on CTV.</div>
+        <div id="instructions" style="font-style:italic; font-size:11px; margin-top:10px;">
+          Videos above shown for demonstration purposes.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= MOBILE LAYOUT ========================= -->
+<div id="mobileVersion">
+  <div class="mobile-player-frame">
+    <div class="mobile-poster-wrapper">
+      <img id="mobilePoster" class="mobile-poster-img" src="https://static.originmedia.tv/website/aperture-sidebyside/jpg/puertorico-onoff.jpg" alt="Video Poster" />
+      <div class="mobile-overlay" id="mobileOverlay"></div>
+      <video id="mobileVideo" preload="none" playsinline webkit-playsinline>
+        <source id="mobileVideoSource" src="" type="video/mp4"/>
+      </video>
+    </div>
+  </div>
+  <div class="mobile-controls-row">
+    <div class="mobile-left-wrap">
+      <span class="mobile-toggle-label">Aperture Overlays:</span>
+      <label class="mobile-toggle-switch">
+        <input type="checkbox" id="mobileToggle" />
+        <span class="mobile-slider"></span>
+      </label>
+    </div>
+    <div id="mobilePlayBtn" class="mobile-play-btn"></div>
+  </div>
+  <div id="mobileDescription" class="mobile-description">
+    <div id="mobileLeftArrow" class="mdNavArrow">◀️</div>
+    <div id="mobileDataTitle" class="mdTitle"></div>
+    <div id="mobileRightArrow" class="mdNavArrow">▶️</div>
+    <div id="mobileDataBrand" class="mdBrand"></div>
+    <div id="mobileDataTagHeader" class="mdTagHeader">Aperture Overlays:
+      <div id="mobileDataTags" class="mdTags"></div>
+    </div>
+  </div>
+  <div id="instructions" style="font-style:italic;">
+    Videos above shown for demonstration purposes.
+  </div>
+</div>
+
+<!-- ======================= SCRIPT: FETCH & PARSE CSV DATA =========================== -->
+<script>
+  // Utility function for mobile detection
+  function isMobile() {
+    return (
+      /Mobi|Android|iPhone|Windows Phone/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 0 && window.innerWidth <= 800)
+    );
+  }
+
+  // Function to parse CSV text and filter rows where playerInclude is "TRUE"
+  function parseCSV(csvText) {
+    const lines = csvText.trim().split("\n");
+    const headers = lines[0].split(",").map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const values = line.split(",").map(v => v.trim());
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || "";
+      });
+      if (row["playerInclude"] && row["playerInclude"].toUpperCase() === "TRUE") {
+        data.push({
+          dataName: row["dataName"],
+          videoTitle: row["videoTitle"],
+          videoBrand: row["videoBrand"],
+          videoTags: row["videoTags"]
+        });
+      }
+    }
+    return data;
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // Fetch the CSV from Google Sheets
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQD7U-L7I573pEiOaJ844rhaDUCn0yoUMy4dAiTxRsNHVowgaSDecjcL-UrCGCSyQdrt7eJ8hQSOBW-/pub?gid=0&single=true&output=csv')
+      .then(response => response.text())
+      .then(csvText => {
+        const videoData = parseCSV(csvText);
+
+        // =================== DESKTOP LOGIC ===================
+        if (!isMobile()) {
+          document.getElementById("desktopVersion").style.display = "block";
+          document.getElementById("mobileVersion").style.display = "none";
+
+          function whiteFlash() {
+            const overlay = document.getElementById("overlay");
+            overlay.style.opacity = "1";
+            overlay.style.transition = "none";
+            setTimeout(() => {
+              overlay.style.transition = "opacity 0.4s ease-out";
+              overlay.style.opacity = "0";
+            }, 100);
+          }
+
+          // Preload posters
+          const preloadedPosters = {};
+          videoData.forEach(data => {
+            if (!preloadedPosters[data.dataName]) {
+              const img = new Image();
+              img.src = "https://static.originmedia.tv/website/aperture-sidebyside/jpg/" + data.dataName + "-onoff.jpg";
+              preloadedPosters[data.dataName] = true;
+            }
+          });
+
+          const innerContainer = document.querySelector(".video-buttons-inner");
+          const visibleCount = 5;
+          const gap = 6;
+          const wrapperWidth = 912;
+          const totalOriginal = videoData.length;
+          let activeDataName = null;
+
+          function createVideoButton(data) {
+            const button = document.createElement("button");
+            button.classList.add("video-button");
+            button.setAttribute("data-name", data.dataName);
+            button.setAttribute("data-src", "https://static.originmedia.tv/website/aperture-sidebyside/mov/" + data.dataName + "-onoff.mov");
+            button.setAttribute("data-poster", "https://static.originmedia.tv/website/aperture-sidebyside/jpg/" + data.dataName + "-onoff.jpg");
+
+            const titleSpan = document.createElement("span");
+            titleSpan.classList.add("video-title");
+            titleSpan.textContent = data.videoTitle;
+            button.appendChild(titleSpan);
+
+            const brandSpan = document.createElement("span");
+            brandSpan.classList.add("video-brand");
+            brandSpan.textContent = data.videoBrand;
+            button.appendChild(brandSpan);
+
+            const tagsDiv = document.createElement("div");
+            tagsDiv.classList.add("video-tags");
+            const headerSpan = document.createElement("span");
+            headerSpan.classList.add("tag-header");
+            headerSpan.textContent = "Aperture Overlays:";
+            tagsDiv.appendChild(headerSpan);
+
+            data.videoTags.split(",").forEach(tagText => {
+              const tagSpan = document.createElement("span");
+              tagSpan.classList.add("video-tag");
+              tagSpan.textContent = tagText.trim();
+              tagsDiv.appendChild(tagSpan);
+            });
+            button.appendChild(tagsDiv);
+
+            return button;
+          }
+
+          const buttons = videoData.map(createVideoButton);
+
+          if (totalOriginal <= visibleCount) {
+            document.getElementById("scroll-left").style.display = "none";
+            document.getElementById("scroll-right").style.display = "none";
+            innerContainer.innerHTML = "";
+            buttons.forEach((btn, idx) => {
+              if (idx === 0) {
+                btn.classList.add("active");
+                activeDataName = btn.getAttribute("data-name");
+              }
+              innerContainer.appendChild(btn);
+            });
+            const fixedButtonWidth = (wrapperWidth - 24) / 5;
+            const totalWidth = totalOriginal * fixedButtonWidth + (totalOriginal - 1) * gap;
+            const marginLeft = (wrapperWidth - totalWidth) / 2;
+            innerContainer.style.marginLeft = marginLeft + "px";
+            innerContainer.style.transform = "translateX(0)";
+          } else {
+            const preClones = buttons.slice(-visibleCount).map(btn => btn.cloneNode(true));
+            const postClones = buttons.slice(0, visibleCount).map(btn => btn.cloneNode(true));
+            preClones.forEach(btn => innerContainer.appendChild(btn));
+            buttons.forEach((btn, idx) => {
+              if (idx === 0) {
+                btn.classList.add("active");
+                activeDataName = btn.getAttribute("data-name");
+              }
+              innerContainer.appendChild(btn);
+            });
+            postClones.forEach(btn => innerContainer.appendChild(btn));
+
+            let currentIndex = visibleCount;
+            innerContainer.style.transform =
+              `translateX(-${currentIndex * ((wrapperWidth - 24) / visibleCount + gap)}px)`;
+            let isScrolling = false;
+
+            function updateActiveClasses() {
+              const allButtons = innerContainer.querySelectorAll(".video-button");
+              allButtons.forEach(btn => {
+                if (btn.getAttribute("data-name") === activeDataName) {
+                  btn.classList.add("active");
+                } else {
+                  btn.classList.remove("active");
+                }
+              });
+            }
+
+            function animateToIndex(newIndex) {
+              if (isScrolling) return;
+              isScrolling = true;
+              innerContainer.classList.add("scrolling");
+              innerContainer.style.transition = "transform 0.6s ease-in-out";
+              innerContainer.style.transform =
+                `translateX(-${newIndex * ((wrapperWidth - 24) / visibleCount + gap)}px)`;
+
+              innerContainer.addEventListener("transitionend", function handler() {
+                innerContainer.style.transition = "none";
+                if (newIndex >= visibleCount + totalOriginal) {
+                  currentIndex = newIndex - totalOriginal;
+                  innerContainer.style.transform =
+                    `translateX(-${currentIndex * ((wrapperWidth - 24) / visibleCount + gap)}px)`;
+                } else if (newIndex < visibleCount) {
+                  currentIndex = newIndex + totalOriginal;
+                  innerContainer.style.transform =
+                    `translateX(-${currentIndex * ((wrapperWidth - 24) / visibleCount + gap)}px)`;
+                } else {
+                  currentIndex = newIndex;
+                }
+                isScrolling = false;
+                innerContainer.classList.remove("scrolling");
+                updateActiveClasses();
+                innerContainer.removeEventListener("transitionend", handler);
+              });
+            }
+
+            document.getElementById("scroll-right").addEventListener("click", function() {
+              if (!isScrolling) animateToIndex(currentIndex + visibleCount);
+            });
+            document.getElementById("scroll-left").addEventListener("click", function() {
+              if (!isScrolling) animateToIndex(currentIndex - visibleCount);
+            });
+          }
+
+          const allInnerButtons = innerContainer.querySelectorAll(".video-button");
+          allInnerButtons.forEach(button => {
+            button.addEventListener("click", () => {
+              const toggle = document.getElementById("toggle");
+              const leftLabel = document.querySelector(".left-label");
+              const rightLabel = document.querySelector(".right-label");
+
+              if (!toggle.checked) {
+                toggle.checked = true;
+                leftLabel.style.color = "grey";
+                rightLabel.style.color = "#000";
+                toggle.dispatchEvent(new Event("change"));
+              }
+              whiteFlash();
+
+              activeDataName = button.getAttribute("data-name");
+              allInnerButtons.forEach(btn => {
+                if (btn.getAttribute("data-name") === activeDataName) {
+                  btn.classList.add("active");
+                } else {
+                  btn.classList.remove("active");
+                }
+              });
+
+              const video = document.getElementById("video");
+              const videoSource = document.getElementById("video-source");
+              video.pause();
+              video.currentTime = 0;
+              videoSource.src = button.getAttribute("data-src");
+              video.poster = button.getAttribute("data-poster");
+              video.load();
+              document.getElementById("playpause-toggle").style.backgroundPosition = "0px 0";
+            });
+          });
+
+          const toggle = document.getElementById("toggle");
+          const video = document.getElementById("video");
+          const soundToggle = document.getElementById("sound-toggle");
+          const playPauseToggle = document.getElementById("playpause-toggle");
+          const overlay = document.getElementById("overlay");
+
+          video.muted = false;
+          soundToggle.style.backgroundPosition = "0px 0";
+          playPauseToggle.style.backgroundPosition = "0px 0";
+          toggle.checked = true;
+          video.style.left = "-960px";
+          setTimeout(() => {
+            toggle.dispatchEvent(new Event("change"));
+          }, 10);
+
+          toggle.addEventListener("change", () => {
+            if (toggle.checked) {
+              document.querySelector(".left-label").style.color = "grey";
+              document.querySelector(".right-label").style.color = "#000";
+            } else {
+              document.querySelector(".left-label").style.color = "#000";
+              document.querySelector(".right-label").style.color = "grey";
+            }
+            whiteFlash();
+            overlay.style.transition = "none";
+            setTimeout(() => {
+              overlay.style.transition = "opacity 0.4s ease-out";
+              overlay.style.opacity = "0";
+            }, 100);
+            video.style.left = toggle.checked ? "-960px" : "0px";
+          });
+
+          function togglePlayPause() {
+            if (video.paused) {
+              video.play();
+              playPauseToggle.style.backgroundPosition = "-50px 0";
+            } else {
+              video.pause();
+              playPauseToggle.style.backgroundPosition = "0px 0";
+            }
+          }
+          video.addEventListener("click", togglePlayPause);
+          playPauseToggle.addEventListener("click", togglePlayPause);
+          soundToggle.addEventListener("click", () => {
+            video.muted = !video.muted;
+            soundToggle.style.backgroundPosition = video.muted ? "-50px 0" : "0px 0";
+          });
+          video.addEventListener("ended", () => {
+            video.pause();
+            video.currentTime = 0;
+            video.load();
+            if (!toggle.checked) {
+              toggle.checked = true;
+              document.querySelector(".left-label").style.color = "grey";
+              document.querySelector(".right-label").style.color = "#000";
+              toggle.dispatchEvent(new Event("change"));
+            }
+          });
+        }
+        // =================== MOBILE LOGIC ===================
+        else {
+          document.getElementById("desktopVersion").style.display = "none";
+          document.getElementById("mobileVersion").style.display = "block";
+
+          const mobilePoster = document.getElementById("mobilePoster");
+          const mobileOverlay = document.getElementById("mobileOverlay");
+          const mobileToggle = document.getElementById("mobileToggle");
+
+          const mobilePlayBtn = document.getElementById("mobilePlayBtn");
+          const mobileVideo = document.getElementById("mobileVideo");
+          const mobileVideoSource = document.getElementById("mobileVideoSource");
+
+          const mobileLeftArrow = document.getElementById("mobileLeftArrow");
+          const mobileRightArrow = document.getElementById("mobileRightArrow");
+
+          const mobileDataTitle = document.getElementById("mobileDataTitle");
+          const mobileDataBrand = document.getElementById("mobileDataBrand");
+          const mobileDataTags = document.getElementById("mobileDataTags");
+
+          let currentIndex = 0;
+          mobileToggle.checked = true;
+
+          function mobileWhiteFlash() {
+            // No operation for mobile white flash
+          }
+
+          function loadMobileData(index) {
+            const data = videoData[index];
+            mobilePoster.style.left = mobileToggle.checked ? "-100%" : "0";
+            const basePoster = "https://static.originmedia.tv/website/aperture-sidebyside/jpg/" + data.dataName + "-onoff.jpg";
+            mobilePoster.src = basePoster;
+            const baseMov = "https://static.originmedia.tv/website/aperture-sidebyside/mov/" + data.dataName + "-on.mov";
+            mobileVideoSource.src = baseMov;
+            mobileVideo.load();
+
+            mobileDataTitle.textContent = data.videoTitle;
+            mobileDataBrand.textContent = "Brand: " + data.videoBrand;
+
+            mobileDataTags.innerHTML = "";
+            data.videoTags.split(",").forEach(t => {
+              const span = document.createElement("span");
+              span.classList.add("mobile-tag");
+              span.textContent = t.trim();
+              mobileDataTags.appendChild(span);
+            });
+          }
+
+          mobileToggle.addEventListener("change", () => {
+            mobileWhiteFlash();
+            loadMobileData(currentIndex);
+          });
+
+          mobileLeftArrow.addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + videoData.length) % videoData.length;
+            mobileWhiteFlash();
+            loadMobileData(currentIndex);
+          });
+          mobileRightArrow.addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % videoData.length;
+            mobileWhiteFlash();
+            loadMobileData(currentIndex);
+          });
+
+          mobilePlayBtn.addEventListener("click", () => {
+            mobileVideo.style.display = "block";
+            mobileVideo.currentTime = 0;
+            mobileVideo.play().then(() => {
+              if (mobileVideo.requestFullscreen) {
+                mobileVideo.requestFullscreen();
+              } else if (mobileVideo.webkitEnterFullscreen) {
+                mobileVideo.webkitEnterFullscreen();
+              }
+            }).catch(err => {
+              console.warn(err);
+            });
+          });
+
+          function hideMobileVideo() {
+            mobileVideo.pause();
+            mobileVideo.currentTime = 0;
+            mobileVideo.load();
+            mobileVideo.style.display = "none";
+          }
+          mobileVideo.addEventListener("ended", hideMobileVideo);
+          mobileVideo.addEventListener("webkitendfullscreen", hideMobileVideo);
+          document.addEventListener("fullscreenchange", () => {
+            if (!document.fullscreenElement) hideMobileVideo();
+          });
+
+          loadMobileData(currentIndex);
+        }
+      })
+      .catch(err => {
+        console.error("Error loading CSV:", err);
+      });
+  });
+</script>
+</body>
+</html>
