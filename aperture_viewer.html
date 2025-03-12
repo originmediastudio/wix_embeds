@@ -264,18 +264,31 @@
       margin: 10px 0;
       text-align: center;
     }
-    @media (max-width: 959px) {
+      
+ @media (min-width: 940px) and (max-width: 959px) {
+  #desktopVersion .scale-container {
+    width: 960px;
+    transform: scale(0.979);
+    transform-origin: top left;
+  }
+  #desktopVersion .centered-box {
+    width: 940px;
+    margin: 0 auto; /* horizontally center the entire block */
+  }
+}
 
-      #desktopVersion .scale-container {
-        width: 960px;
-        transform: scale(0.77);
-        transform-origin: top left;
-      }
-      #desktopVersion .centered-box {
-      width: 740px;
-      margin: 0 auto; /* horizontally center the entire block */
-    }
-    }
+@media (max-width: 939px) {
+  #desktopVersion .scale-container {
+    width: 960px;
+    transform: scale(0.77);
+    transform-origin: top left;
+  }
+  #desktopVersion .centered-box {
+    width: 740px;
+    margin: 0 auto; /* horizontally center the entire block */
+  }
+}
+
   </style>
 
   <!-- ======================================
