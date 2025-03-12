@@ -550,7 +550,7 @@
   </div>
 </div>
 
-<!-- ======================= SCRIPT: FETCH & PARSE CSV DATA =========================== -->
+<!-- ======================= SCRIPT: FETCH & PARSE TSV DATA =========================== -->
 <script>
   // Utility function for mobile detection
   function isMobile() {
@@ -560,15 +560,15 @@
     );
   }
 
-  // Function to parse CSV text and filter rows where playerInclude is "TRUE"
-  function parseCSV(csvText) {
-    const lines = csvText.trim().split("\n");
-    const headers = lines[0].split(",").map(h => h.trim());
+  // Function to parse TSV text and filter rows where playerInclude is "TRUE"
+  function parseTSV(tsvText) {
+    const lines = tsvText.trim().split("\n");
+    const headers = lines[0].split("\t").map(h => h.trim());
     const data = [];
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
-      const values = line.split(",").map(v => v.trim());
+      const values = line.split("\t").map(v => v.trim());
       const row = {};
       headers.forEach((header, index) => {
         row[header] = values[index] || "";
@@ -586,11 +586,11 @@
   }
 
   document.addEventListener("DOMContentLoaded", function() {
-    // Fetch the CSV from Google Sheets
-    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQD7U-L7I573pEiOaJ844rhaDUCn0yoUMy4dAiTxRsNHVowgaSDecjcL-UrCGCSyQdrt7eJ8hQSOBW-/pub?gid=0&single=true&output=csv')
+    // Fetch the TSV from Google Sheets
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQD7U-L7I573pEiOaJ844rhaDUCn0yoUMy4dAiTxRsNHVowgaSDecjcL-UrCGCSyQdrt7eJ8hQSOBW-/pub?gid=0&single=true&output=tsv')
       .then(response => response.text())
-      .then(csvText => {
-        const videoData = parseCSV(csvText);
+      .then(tsvText => {
+        const videoData = parseTSV(tsvText);
 
         // =================== DESKTOP LOGIC ===================
         if (!isMobile()) {
@@ -930,7 +930,7 @@
         }
       })
       .catch(err => {
-        console.error("Error loading CSV:", err);
+        console.error("Error loading TSV:", err);
       });
   });
 </script>
