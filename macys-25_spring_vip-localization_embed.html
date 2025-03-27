@@ -13517,10 +13517,11 @@ const videoElement = `
 
                 // Display fallback video
                 const fallbackVideoElement = `
-                    <video autoplay playsinline onclick="this.paused ? this.play() : this.pause();">
-                        <source src="${fallbackVideoUrl}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>`;
+
+                    <video autoplay playsinline controls>
+        <source src="${fallbackVideoUrl}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>`;
                 videoContainer.innerHTML = fallbackVideoElement;
 
                 // Display fallback text
