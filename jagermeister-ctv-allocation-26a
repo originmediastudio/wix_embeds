@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origin CTV - Jägermeister Budget Allocation</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --good: #065f46;
+      --warn: #92400e;
+      --bad: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 20px 32px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tabs {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      width: 100%;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+    }
+
+    .tab-btn {
+      width: auto;
+      min-width: 140px;
+      background: white;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .plan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: #f9fafb;
+    }
+
+    tfoot td {
+      background: #f9fafb;
+      font-weight: 700;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .content-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .cpm {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .pct-input {
+      width: 110px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+    }
+
+    .num {
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .status.good {
+      background: #ecfdf5;
+      color: var(--good);
+      border: 1px solid #a7f3d0;
+    }
+
+    .status.warn {
+      background: #fffbeb;
+      color: var(--warn);
+      border: 1px solid #fde68a;
+    }
+
+    .footnote {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .summary { grid-template-columns: repeat(2, 1fr); }
+      .topbar { align-items: flex-start; }
+    }
+
+    @media (max-width: 640px) {
+      .summary { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: stretch; }
+      .actions { justify-content: space-between; }
+      table, thead, tbody, tfoot, th, td, tr { display: block; }
+      thead { display: none; }
+      tfoot tr {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: white;
+        overflow: hidden;
+      }
+      tr {
+        margin-bottom: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: white;
+        overflow: hidden;
+      }
+      td {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: 600;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Origin CTV - Jägermeister Budget Allocation</h1>
+    <div class="sub">Adjust how the fixed plan budget is split across the four content categories. Impressions update automatically based on CPM.</div>
+
+    <div class="topbar">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab100" type="button">$100K Plan</button>
+        <button class="tab-btn" id="tab150" type="button">$150K Plan</button>
+      </div>
+      <div class="actions">
+        <div class="plan-chip" id="planBudgetLabel">Total Budget: $100,000</div>
+        <button id="resetBtn" type="button">Reset to Plan</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>CPM</th>
+            <th>% of Budget</th>
+            <th class="num">Investment</th>
+            <th class="num">Estimated Impressions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="num"><strong>Total Estimated Impressions</strong></td>
+            <td class="num" id="tableTotalImps">0</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div id="status" class="status"></div>
+
+      <div class="summary">
+        <div class="card">
+          <div class="metric-title">Allocated %</div>
+          <div class="metric-value" id="allocatedPct">0%</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Allocated Budget</div>
+          <div class="metric-value" id="allocatedBudget">$0</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Remaining Budget</div>
+          <div class="metric-value" id="remainingBudget">$0</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Total Impressions</div>
+          <div class="metric-value" id="totalImps">0</div>
+        </div>
+      </div>
+
+      <div class="footnote">
+        Formula used: <strong>Impressions = (Investment / CPM) × 1,000</strong>.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const plans = {
+      plan100: {
+        budget: 100000,
+        categories: [
+          {
+            name: 'Live In-Game',
+            cpm: 63.5,
+            defaultInvestment: 32987
+          },
+          {
+            name: 'Shoulder (post/pre game)',
+            cpm: 44.5,
+            defaultInvestment: 30823
+          },
+          {
+            name: 'Shoulder (player profiles, bracket break downs, analysis)',
+            cpm: 29.5,
+            defaultInvestment: 20433
+          },
+          {
+            name: 'Audience (college basketball viewers)',
+            cpm: 22.75,
+            defaultInvestment: 15758
+          }
+        ]
+      },
+      plan150: {
+        budget: 150000,
+        categories: [
+          {
+            name: 'Live In-Game',
+            cpm: 63.5,
+            defaultInvestment: 53975
+          },
+          {
+            name: 'Shoulder (post/pre game)',
+            cpm: 40.94,
+            defaultInvestment: 44215
+          },
+          {
+            name: 'Shoulder (player profiles, bracket break downs, analysis)',
+            cpm: 27.14,
+            defaultInvestment: 29311
+          },
+          {
+            name: 'Audience (college basketball viewers)',
+            cpm: 20.93,
+            defaultInvestment: 22500
+          }
+        ]
+      }
+    };
+
+    let activePlanKey = 'plan100';
+
+    const rowsEl = document.getElementById('rows');
+    const planBudgetLabelEl = document.getElementById('planBudgetLabel');
+    const allocatedPctEl = document.getElementById('allocatedPct');
+    const allocatedBudgetEl = document.getElementById('allocatedBudget');
+    const remainingBudgetEl = document.getElementById('remainingBudget');
+    const totalImpsEl = document.getElementById('totalImps');
+    const tableTotalImpsEl = document.getElementById('tableTotalImps');
+    const statusEl = document.getElementById('status');
+    const resetBtn = document.getElementById('resetBtn');
+    const tab100Btn = document.getElementById('tab100');
+    const tab150Btn = document.getElementById('tab150');
+
+    function getActivePlan() {
+      return plans[activePlanKey];
+    }
+
+    function getActiveCategories() {
+      return getActivePlan().categories;
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatPercent(value) {
+      return `${value.toFixed(1)}%`;
+    }
+
+    function getDefaultPercents() {
+      const categories = getActiveCategories();
+      const total = categories.reduce((sum, item) => sum + item.defaultInvestment, 0);
+      return categories.map(item => (item.defaultInvestment / total) * 100);
+    }
+
+    function renderRows() {
+      const categories = getActiveCategories();
+      const defaultPercents = getDefaultPercents();
+
+      planBudgetLabelEl.textContent = `Total Budget: ${formatCurrency(getActivePlan().budget)}`;
+      tab100Btn.classList.toggle('active', activePlanKey === 'plan100');
+      tab150Btn.classList.toggle('active', activePlanKey === 'plan150');
+
+      rowsEl.innerHTML = categories.map((item, index) => `
+        <tr>
+          <td data-label="Category">
+            <div>
+              <div class="content-name">${item.name}</div>
+            </div>
+          </td>
+          <td data-label="CPM"><span class="cpm">${formatCurrency(item.cpm)}</span></td>
+          <td data-label="% of Budget">
+            <input
+              class="pct-input"
+              type="number"
+              min="0"
+              step="0.1"
+              value="${defaultPercents[index].toFixed(1)}"
+              data-index="${index}"
+            />
+          </td>
+          <td data-label="Investment" class="num" id="investment-${index}">$0</td>
+          <td data-label="Estimated Impressions" class="num" id="imps-${index}">0</td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('.pct-input').forEach(input => {
+        input.addEventListener('input', calculate);
+      });
+    }
+
+    function calculate() {
+      const categories = getActiveCategories();
+      const totalBudget = getActivePlan().budget;
+      const percentInputs = [...document.querySelectorAll('.pct-input')];
+      const percents = percentInputs.map(input => Number(input.value) || 0);
+      const totalPercent = percents.reduce((sum, value) => sum + value, 0);
+
+      let totalAllocated = 0;
+      let totalImpressions = 0;
+
+      percents.forEach((percent, index) => {
+        const investment = totalBudget * (percent / 100);
+        const impressions = categories[index].cpm > 0 ? (investment / categories[index].cpm) * 1000 : 0;
+
+        totalAllocated += investment;
+        totalImpressions += impressions;
+
+        document.getElementById(`investment-${index}`).textContent = formatCurrency(investment);
+        document.getElementById(`imps-${index}`).textContent = formatNumber(impressions);
+      });
+
+      const remaining = totalBudget - totalAllocated;
+      allocatedPctEl.textContent = formatPercent(totalPercent);
+      allocatedBudgetEl.textContent = formatCurrency(totalAllocated);
+      remainingBudgetEl.textContent = formatCurrency(remaining);
+      totalImpsEl.textContent = formatNumber(totalImpressions);
+      tableTotalImpsEl.textContent = formatNumber(totalImpressions);
+
+      if (Math.abs(totalPercent - 100) < 0.05) {
+        statusEl.className = 'status good';
+        statusEl.textContent = 'Allocation is balanced at 100%.';
+      } else if (totalPercent < 100) {
+        statusEl.className = 'status warn';
+        statusEl.textContent = `You still have ${formatPercent(100 - totalPercent)} left to allocate. Increase a line item % of budget to balance to 100%.`;
+      } else {
+        statusEl.className = 'status warn';
+        statusEl.textContent = `You are over-allocated by ${formatPercent(totalPercent - 100)}. Decrease a line item % of budget to balance to 100%.`;
+      }
+    }
+
+    function resetToPlan() {
+      const defaultPercents = getDefaultPercents();
+      document.querySelectorAll('.pct-input').forEach((input, index) => {
+        input.value = defaultPercents[index].toFixed(1);
+      });
+      calculate();
+    }
+
+    function switchPlan(planKey) {
+      activePlanKey = planKey;
+      renderRows();
+      calculate();
+    }
+
+    resetBtn.addEventListener('click', resetToPlan);
+    tab100Btn.addEventListener('click', () => switchPlan('plan100'));
+    tab150Btn.addEventListener('click', () => switchPlan('plan150'));
+
+    renderRows();
+    calculate();
+  </script>
+</body>
+</html>
